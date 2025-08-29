@@ -5,19 +5,37 @@ import "package:flutter/material.dart";
 class Square extends StatelessWidget {
   final bool isWhiteVar;
   final ChessPiece? piece;
-  const Square({super.key, required this.isWhiteVar, this.piece});
+  final bool isSelected;
+  final void Function()? onTap;
+  const Square({
+    super.key,
+    required this.isWhiteVar,
+    this.piece,
+    required this.isSelected,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    //TODO: make thses colors more premium
-    return Container(
-      color: isWhiteVar ? MyColors.primaryColor : MyColors.secondaryColor,
-      child: piece != null
-          ? Image.asset(
-              piece!.imagePath,
-              // color: piece!.isWhite ? Colors.white : Colors.black,
-            )
-          : null,
+    Color? squareColor;
+    if (isSelected) {
+      squareColor = MyColors.selectedColor;
+    } else {
+      squareColor = isWhiteVar
+          ? MyColors.primaryColor
+          : MyColors.secondaryColor;
+    }
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        color: squareColor,
+        child: piece != null
+            ? Image.asset(
+                piece!.imagePath,
+              )
+            : null,
+      ),
     );
   }
 }

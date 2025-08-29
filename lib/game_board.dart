@@ -15,6 +15,21 @@ class _GameBoardState extends State<GameBoard> {
   // with each position possibly containing a piece
   late List<List<ChessPiece?>> board;
 
+  ChessPiece? selectedPiece;
+
+  int selectedRow = -1;
+  int selectedCol = -1;
+
+  void pieceSelected(int row, int col) {
+    setState(() {
+      if (board[row][col] != null) {
+        selectedPiece = board[row][col];
+        selectedRow = row;
+        selectedCol = col;
+      }
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -24,7 +39,7 @@ class _GameBoardState extends State<GameBoard> {
   void _initializeBoard() {
     List<List<ChessPiece?>> newBoard = List.generate(
       8,
-      (i) => List.generate(8, (j) => null),
+      (index) => List.generate(8, (index) => null),
     );
     // Place pawns
     for (int i = 0; i < 8; i++) {
@@ -135,11 +150,18 @@ class _GameBoardState extends State<GameBoard> {
           crossAxisCount: 8,
         ),
         itemBuilder: (context, index) {
+          // this is to get the row and column of this square
           int row = index ~/ 8;
           int col = index % 8;
+
+          // this checks the square is selected or not
+          bool isSelected = (row == selectedRow && col == selectedCol);
+
           return Square(
             isWhiteVar: isWhiteSquare(index),
             piece: board[row][col],
+            isSelected: isSelected,
+            onTap: () => pieceSelected(row, col),
           );
         },
       ),

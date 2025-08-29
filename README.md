@@ -1,1 +1,1 @@
-# Simple Chess Game
+# Simple 2 Player Chess Game
