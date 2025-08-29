@@ -1,4 +1,5 @@
 import 'package:chess/helper/helper_methods.dart';
+import 'package:chess/widgets/piece.dart';
 import 'package:chess/widgets/square.dart';
 import 'package:flutter/material.dart';
 
@@ -10,6 +11,13 @@ class GameBoard extends StatefulWidget {
 }
 
 class _GameBoardState extends State<GameBoard> {
+  //To create a piece
+  ChessPiece myPawn = ChessPiece(
+    type: ChessPieceType.pawn,
+    isWhite: true,
+    imagePath: 'assets/images/wp.png',
+  );
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -20,7 +28,7 @@ class _GameBoardState extends State<GameBoard> {
           crossAxisCount: 8,
         ),
         itemBuilder: (context, index) {
-          return Square(isWhiteVar: isWhite(index));
+          return Square(isWhiteVar: isWhite(index), piece: myPawn);
         },
       ),
     );

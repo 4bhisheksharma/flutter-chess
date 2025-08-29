@@ -57,4 +57,3 @@ app.*.map.json
 /analysis_options.yaml
 /chess.iml
 /pubspec.lock
-/pubspec.yaml
