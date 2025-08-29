@@ -10,6 +10,15 @@ class GameBoard extends StatefulWidget {
 class _GameBoardState extends State<GameBoard> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold();
+    return Scaffold(
+      body: GridView.builder(
+        itemCount: 8 * 8,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 8,
+        ),
+        itemBuilder: (context, index) => Text(index.toString()),
+      ),
+    );
   }
 }
