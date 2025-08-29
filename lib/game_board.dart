@@ -11,12 +11,119 @@ class GameBoard extends StatefulWidget {
 }
 
 class _GameBoardState extends State<GameBoard> {
-  //To create a piece
-  ChessPiece myPawn = ChessPiece(
-    type: ChessPieceType.pawn,
-    isWhite: true,
-    imagePath: 'assets/images/wp.png',
-  );
+  //here is a 2D list representing the chess board
+  // with each position possibly containing a piece
+  late List<List<ChessPiece?>> board;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeBoard();
+  }
+
+  void _initializeBoard() {
+    List<List<ChessPiece?>> newBoard = List.generate(
+      8,
+      (i) => List.generate(8, (j) => null),
+    );
+    // Place pawns
+    for (int i = 0; i < 8; i++) {
+      newBoard[1][i] = ChessPiece(
+        type: ChessPieceType.pawn,
+        isWhite: false,
+        imagePath: 'assets/images/bp.png',
+      );
+      newBoard[6][i] = ChessPiece(
+        type: ChessPieceType.pawn,
+        isWhite: true,
+        imagePath: 'assets/images/wp.png',
+      );
+    }
+    // Place other pieces
+    newBoard[0][0] = ChessPiece(
+      type: ChessPieceType.rook,
+      isWhite: false,
+      imagePath: 'assets/images/br.png',
+    );
+    newBoard[0][1] = ChessPiece(
+      type: ChessPieceType.knight,
+      isWhite: false,
+      imagePath: 'assets/images/bn.png',
+    );
+    newBoard[0][2] = ChessPiece(
+      type: ChessPieceType.bishop,
+      isWhite: false,
+      imagePath: 'assets/images/bb.png',
+    );
+    newBoard[0][3] = ChessPiece(
+      type: ChessPieceType.queen,
+      isWhite: false,
+      imagePath: 'assets/images/bq.png',
+    );
+    newBoard[0][4] = ChessPiece(
+      type: ChessPieceType.king,
+      isWhite: false,
+      imagePath: 'assets/images/bk.png',
+    );
+    newBoard[0][5] = ChessPiece(
+      type: ChessPieceType.bishop,
+      isWhite: false,
+      imagePath: 'assets/images/bb.png',
+    );
+    newBoard[0][6] = ChessPiece(
+      type: ChessPieceType.knight,
+      isWhite: false,
+      imagePath: 'assets/images/bn.png',
+    );
+    newBoard[0][7] = ChessPiece(
+      type: ChessPieceType.rook,
+      isWhite: false,
+      imagePath: 'assets/images/br.png',
+    );
+    newBoard[7][0] = ChessPiece(
+      type: ChessPieceType.rook,
+      isWhite: true,
+      imagePath: 'assets/images/wr.png',
+    );
+    newBoard[7][1] = ChessPiece(
+      type: ChessPieceType.knight,
+      isWhite: true,
+      imagePath: 'assets/images/wn.png',
+    );
+    newBoard[7][2] = ChessPiece(
+      type: ChessPieceType.bishop,
+      isWhite: true,
+      imagePath: 'assets/images/wb.png',
+    );
+    newBoard[7][3] = ChessPiece(
+      type: ChessPieceType.queen,
+      isWhite: true,
+      imagePath: 'assets/images/wq.png',
+    );
+    newBoard[7][4] = ChessPiece(
+      type: ChessPieceType.king,
+      isWhite: true,
+      imagePath: 'assets/images/wk.png',
+    );
+    newBoard[7][5] = ChessPiece(
+      type: ChessPieceType.bishop,
+      isWhite: true,
+      imagePath: 'assets/images/wb.png',
+    );
+    newBoard[7][6] = ChessPiece(
+      type: ChessPieceType.knight,
+      isWhite: true,
+      imagePath: 'assets/images/wn.png',
+    );
+    newBoard[7][7] = ChessPiece(
+      type: ChessPieceType.rook,
+      isWhite: true,
+      imagePath: 'assets/images/wr.png',
+    );
+    setState(() {
+      board = newBoard;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +135,12 @@ class _GameBoardState extends State<GameBoard> {
           crossAxisCount: 8,
         ),
         itemBuilder: (context, index) {
-          return Square(isWhiteVar: isWhite(index), piece: myPawn);
+          int row = index ~/ 8;
+          int col = index % 8;
+          return Square(
+            isWhiteVar: isWhiteSquare(index),
+            piece: board[row][col],
+          );
         },
       ),
     );
