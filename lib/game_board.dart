@@ -31,6 +31,20 @@ class _GameBoardState extends State<GameBoard> {
         selectedRow = row;
         selectedCol = col;
       }
+      // if there is the place which is selected
+      //and the player tap on a square which is a valid move then, move there
+      else if (selectedPiece != null &&
+          validMoves.any((element) => element[0] == row && element[1] == col)) {
+        movePiece(row, col);
+        return; // to avoid clearing the selection below
+      } else {
+        // clear the selection if tapped on an empty square that is not a valid move
+        selectedPiece = null;
+        selectedRow = -1;
+        selectedCol = -1;
+        validMoves = [];
+        return; // to avoid calculating valid moves below
+      }
 
       // here is the logic of determining valid moves for the selected piece
       validMoves = calculateRawValidMoves(
@@ -236,11 +250,11 @@ class _GameBoardState extends State<GameBoard> {
     );
 
     // this is only for testing ---
-    newBoard[3][3] = ChessPiece(
-      type: ChessPieceType.knight,
-      isWhite: true,
-      imagePath: 'assets/images/wn.png',
-    );
+    // newBoard[3][3] = ChessPiece(
+    //   type: ChessPieceType.knight,
+    //   isWhite: true,
+    //   imagePath: 'assets/images/wn.png',
+    // );
 
     // Place pawns
     for (int i = 0; i < 8; i++) {
@@ -338,6 +352,20 @@ class _GameBoardState extends State<GameBoard> {
     );
     setState(() {
       board = newBoard;
+    });
+  }
+
+  //to move the pieces
+  void movePiece(int newRow, int newCol) {
+    // move and clear the previous position
+    board[newRow][newCol] = board[selectedRow][selectedCol];
+    board[selectedRow][selectedCol] = null;
+
+    // clear the selection
+    setState(() {
+      selectedRow = -1;
+      selectedCol = -1;
+      validMoves = [];
     });
   }
 
