@@ -185,6 +185,31 @@ class _GameBoardState extends State<GameBoard> {
         }
         break;
       case ChessPieceType.king:
+        var kingMoves = [
+          [1, 0],
+          [-1, 0],
+          [0, 1],
+          [0, -1],
+          [1, 1],
+          [1, -1],
+          [-1, 1],
+          [-1, -1],
+        ];
+        for (var move in kingMoves) {
+          var newRow = row + move[0];
+          var newCol = col + move[1];
+          if (!isInBoard(newRow, newCol)) {
+            continue;
+          }
+          if (board[newRow][newCol] != null) {
+            if (board[newRow][newCol]!.isWhite != selectedPiece.isWhite) {
+              // can capture
+              candidateMoves.add([newRow, newCol]);
+            }
+            continue;
+          }
+          candidateMoves.add([newRow, newCol]);
+        }
         break;
     }
 
@@ -209,6 +234,14 @@ class _GameBoardState extends State<GameBoard> {
       8,
       (index) => List.generate(8, (index) => null),
     );
+
+    // this is only for testing ---
+    newBoard[3][3] = ChessPiece(
+      type: ChessPieceType.knight,
+      isWhite: true,
+      imagePath: 'assets/images/wn.png',
+    );
+
     // Place pawns
     for (int i = 0; i < 8; i++) {
       newBoard[1][i] = ChessPiece(
