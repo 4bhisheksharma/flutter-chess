@@ -35,7 +35,7 @@ class Square extends StatelessWidget {
       child: Container(
         color: squareColor,
 
-        // if it is valid move make the valid move indicator a small circle and remove square color
+        // if it is valid move make the valid move indicator a small circle
         child: piece != null
             ? Image.asset(piece!.imagePath, fit: BoxFit.contain)
             : isValidMove

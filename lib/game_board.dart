@@ -1,4 +1,5 @@
 import 'package:chess/helper/helper_methods.dart';
+import 'package:chess/widgets/dead_piece.dart';
 import 'package:chess/widgets/piece.dart';
 import 'package:chess/widgets/square.dart';
 import 'package:flutter/material.dart';
@@ -24,7 +25,16 @@ class _GameBoardState extends State<GameBoard> {
   // so each move is represented as a list of [row, col] pairs
   List<List<int>> validMoves = [];
 
+  // a list of white pieces that have been killed by the black pieces
+  List<ChessPiece> capturedWhitePieces = [];
+
+  // a list of black pieces that have been killed by the white pieces
+  List<ChessPiece> capturedBlackPieces = [];
+
   void pieceSelected(int row, int col) {
+    //TODO:
+    //if player piece can kills the another player piece, that piece's square should be displayed red
+
     setState(() {
       // no piece is selected
       if (selectedPiece == null && board[row][col] != null) {
@@ -63,7 +73,10 @@ class _GameBoardState extends State<GameBoard> {
     ChessPiece? selectedPiece,
   ) {
     List<List<int>> candidateMoves = [];
-    int direction = selectedPiece!.isWhite ? -1 : 1;
+
+    if (selectedPiece == null) return candidateMoves;
+
+    int direction = selectedPiece.isWhite ? -1 : 1;
 
     switch (selectedPiece.type) {
       case ChessPieceType.pawn:
@@ -358,12 +371,24 @@ class _GameBoardState extends State<GameBoard> {
 
   //to move the pieces
   void movePiece(int newRow, int newCol) {
+    // if the new spot has an opponent piece
+    if (board[newRow][newCol] != null) {
+      var capturedPiece = board[newRow][newCol]!;
+      //adding to their places
+      if (capturedPiece.isWhite) {
+        capturedWhitePieces.add(capturedPiece);
+      } else {
+        capturedBlackPieces.add(capturedPiece);
+      }
+    }
+
     // move and clear the previous position
     board[newRow][newCol] = board[selectedRow][selectedCol];
     board[selectedRow][selectedCol] = null;
 
     // clear the selection
     setState(() {
+      selectedPiece = null;
       selectedRow = -1;
       selectedCol = -1;
       validMoves = [];
@@ -373,37 +398,72 @@ class _GameBoardState extends State<GameBoard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: GridView.builder(
-        itemCount: 8 * 8,
-        physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 8,
-        ),
-        itemBuilder: (context, index) {
-          // this is to get the row and column of this square
-          int row = index ~/ 8;
-          int col = index % 8;
+      body: Column(
+        children: [
+          // here are the white pieces taken
+          Expanded(
+            child: GridView.builder(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 8,
+              ),
+              itemCount: capturedWhitePieces.length,
+              itemBuilder: (context, index) => DeadPiece(
+                imagePath: capturedWhitePieces[index].imagePath,
+                isWhite: true,
+              ),
+            ),
+          ),
 
-          // this checks the square is selected or not
-          bool isSelected = (row == selectedRow && col == selectedCol);
+          Expanded(
+            flex: 4,
+            child: GridView.builder(
+              itemCount: 8 * 8,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 8,
+              ),
+              itemBuilder: (context, index) {
+                // this is to get the row and column of this square
+                int row = index ~/ 8;
+                int col = index % 8;
 
-          // check the square is valid move or not
-          bool isValidMove = false;
-          for (var position in validMoves) {
-            if (position[0] == row && position[1] == col) {
-              isValidMove = true;
-              break;
-            }
-          }
+                // this checks the square is selected or not
+                bool isSelected = (row == selectedRow && col == selectedCol);
 
-          return Square(
-            isWhiteVar: isWhiteSquare(index),
-            piece: board[row][col],
-            isSelected: isSelected,
-            isValidMove: isValidMove,
-            onTap: () => pieceSelected(row, col),
-          );
-        },
+                // check the square is valid move or not
+                bool isValidMove = false;
+                for (var position in validMoves) {
+                  if (position[0] == row && position[1] == col) {
+                    isValidMove = true;
+                    break;
+                  }
+                }
+
+                return Square(
+                  isWhiteVar: isWhiteSquare(index),
+                  piece: board[row][col],
+                  isSelected: isSelected,
+                  isValidMove: isValidMove,
+                  onTap: () => pieceSelected(row, col),
+                );
+              },
+            ),
+          ),
+
+          // and here are the black pieces taken
+          Expanded(
+            child: GridView.builder(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 8,
+              ),
+              itemCount: capturedBlackPieces.length,
+              itemBuilder: (context, index) => DeadPiece(
+                imagePath: capturedBlackPieces[index].imagePath,
+                isWhite: false,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
