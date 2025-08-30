@@ -26,7 +26,15 @@ class _GameBoardState extends State<GameBoard> {
 
   void pieceSelected(int row, int col) {
     setState(() {
-      if (board[row][col] != null) {
+      // no piece is selected
+      if (selectedPiece == null && board[row][col] != null) {
+        selectedPiece = board[row][col];
+        selectedRow = row;
+        selectedCol = col;
+      }
+      // there is the piece which is already selected but the player can select another piece
+      else if (board[row][col] != null &&
+          board[row][col]!.isWhite == selectedPiece!.isWhite) {
         selectedPiece = board[row][col];
         selectedRow = row;
         selectedCol = col;
@@ -37,13 +45,6 @@ class _GameBoardState extends State<GameBoard> {
           validMoves.any((element) => element[0] == row && element[1] == col)) {
         movePiece(row, col);
         return; // to avoid clearing the selection below
-      } else {
-        // clear the selection if tapped on an empty square that is not a valid move
-        selectedPiece = null;
-        selectedRow = -1;
-        selectedCol = -1;
-        validMoves = [];
-        return; // to avoid calculating valid moves below
       }
 
       // here is the logic of determining valid moves for the selected piece
