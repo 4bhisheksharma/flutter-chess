@@ -153,6 +153,36 @@ class _GameBoardState extends State<GameBoard> {
         }
         break;
       case ChessPieceType.queen:
+        // horizontal, vertical and diagonal directions
+        var directions = [
+          [1, 0],
+          [-1, 0],
+          [0, 1],
+          [0, -1],
+          [1, 1],
+          [1, -1],
+          [-1, 1],
+          [-1, -1],
+        ];
+        for (var direction in directions) {
+          var i = 1;
+          while (true) {
+            var newRow = row + i * direction[0];
+            var newCol = col + i * direction[1];
+            if (!isInBoard(newRow, newCol)) {
+              break;
+            }
+            if (board[newRow][newCol] != null) {
+              if (board[newRow][newCol]!.isWhite != selectedPiece.isWhite) {
+                // can capture
+                candidateMoves.add([newRow, newCol]);
+              }
+              break; //block the move
+            }
+            candidateMoves.add([newRow, newCol]);
+            i++;
+          }
+        }
         break;
       case ChessPieceType.king:
         break;
