@@ -22,8 +22,8 @@ class Square extends StatelessWidget {
     Color? squareColor;
     if (isSelected) {
       squareColor = MyColors.selectedColor;
-    } else if (isValidMove) {
-      squareColor = MyColors.validMoveColor;
+      // } else if (isValidMove) {
+      //   squareColor = MyColors.validMoveColor;
     } else {
       squareColor = isWhiteVar
           ? MyColors.primaryColor
@@ -34,7 +34,22 @@ class Square extends StatelessWidget {
       onTap: onTap,
       child: Container(
         color: squareColor,
-        child: piece != null ? Image.asset(piece!.imagePath) : null,
+
+        // if it is valid move make the valid move indicator a small circle and remove square color
+        child: piece != null
+            ? Image.asset(piece!.imagePath, fit: BoxFit.contain)
+            : isValidMove
+            ? Center(
+                child: Container(
+                  width: 20,
+                  height: 20,
+                  decoration: BoxDecoration(
+                    color: MyColors.validMoveColor,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              )
+            : null,
       ),
     );
   }
