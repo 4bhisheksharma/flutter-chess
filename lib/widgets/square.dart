@@ -6,12 +6,14 @@ class Square extends StatelessWidget {
   final bool isWhiteVar;
   final ChessPiece? piece;
   final bool isSelected;
+  final bool isValidMove;
   final void Function()? onTap;
   const Square({
     super.key,
     required this.isWhiteVar,
     this.piece,
     required this.isSelected,
+    required this.isValidMove,
     required this.onTap,
   });
 
@@ -20,6 +22,8 @@ class Square extends StatelessWidget {
     Color? squareColor;
     if (isSelected) {
       squareColor = MyColors.selectedColor;
+    } else if (isValidMove) {
+      squareColor = MyColors.validMoveColor;
     } else {
       squareColor = isWhiteVar
           ? MyColors.primaryColor
@@ -30,11 +34,7 @@ class Square extends StatelessWidget {
       onTap: onTap,
       child: Container(
         color: squareColor,
-        child: piece != null
-            ? Image.asset(
-                piece!.imagePath,
-              )
-            : null,
+        child: piece != null ? Image.asset(piece!.imagePath) : null,
       ),
     );
   }

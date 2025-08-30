@@ -4,4 +4,5 @@ class MyColors {
   static const Color primaryColor = Color.fromRGBO(235, 236, 208, 1);
   static const Color secondaryColor = Color.fromRGBO(115, 149, 82, 1);
   static const Color selectedColor = Color.fromRGBO(245, 246, 130, 1);
+  static const Color validMoveColor = Color.fromRGBO(232, 234, 138, 1);
 }
