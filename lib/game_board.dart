@@ -80,15 +80,18 @@ class _GameBoardState extends State<GameBoard> {
           while (true) {
             var newRow = row + i * direction[0];
             var newCol = col + i * direction[1];
-            if (!isInBoard(newRow, newCol)) break;
-            candidateMoves.add([newRow, newCol]);
+            if (!isInBoard(newRow, newCol)) {
+              break;
+            }
+
             if (board[newRow][newCol] != null) {
               if (board[newRow][newCol]!.isWhite != selectedPiece.isWhite) {
                 // can capture
                 candidateMoves.add([newRow, newCol]);
               }
+              break; // block the move
             }
-            break;
+
             candidateMoves.add([newRow, newCol]);
             i++;
           }
