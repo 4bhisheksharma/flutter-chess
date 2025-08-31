@@ -89,6 +89,17 @@ class _GameBoardState extends State<GameBoard> {
 
     switch (selectedPiece.type) {
       case ChessPieceType.pawn:
+        //can chaptured diagonal
+        if (isInBoard(row + direction, col - 1) &&
+            board[row + direction][col - 1] != null &&
+            board[row + direction][col - 1]!.isWhite != selectedPiece.isWhite) {
+          candidateMoves.add([row + direction, col - 1]);
+        }
+        if (isInBoard(row + direction, col + 1) &&
+            board[row + direction][col + 1] != null &&
+            board[row + direction][col + 1]!.isWhite != selectedPiece.isWhite) {
+          candidateMoves.add([row + direction, col + 1]);
+        }
         if (isInBoard(row + direction, col) &&
             board[row + direction][col] == null) {
           candidateMoves.add([row + direction, col]);
