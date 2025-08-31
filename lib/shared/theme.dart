@@ -6,4 +6,5 @@ class MyColors {
   static const Color selectedColor = Color.fromRGBO(245, 246, 130, 1);
   // static const Color validMoveColor = Color.fromRGBO(232, 234, 138, 1);
   static const Color validMoveColor = Color.fromRGBO(214, 214, 203, 1);
+  static const Color captureColor = Color.fromRGBO(223, 170, 170, 1);
 }

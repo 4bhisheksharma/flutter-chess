@@ -444,6 +444,10 @@ class _GameBoardState extends State<GameBoard> {
                   piece: board[row][col],
                   isSelected: isSelected,
                   isValidMove: isValidMove,
+                  isCanChapture:
+                      isValidMove &&
+                      board[row][col] != null &&
+                      board[row][col]!.isWhite != selectedPiece?.isWhite,
                   onTap: () => pieceSelected(row, col),
                 );
               },
