@@ -31,16 +31,19 @@ class _GameBoardState extends State<GameBoard> {
   // a list of black pieces that have been killed by the white pieces
   List<ChessPiece> capturedBlackPieces = [];
 
-  void pieceSelected(int row, int col) {
-    //TODO:
-    //if player piece can kills the another player piece, that piece's square should be displayed red
+  // this is a bool to indicate whose turn
+  bool isWhiteTurn = true;
 
+  // this function is called when a square is tapped
+  void pieceSelected(int row, int col) {
     setState(() {
       // no piece is selected
       if (selectedPiece == null && board[row][col] != null) {
-        selectedPiece = board[row][col];
-        selectedRow = row;
-        selectedCol = col;
+        if (board[row][col]!.isWhite == isWhiteTurn) {
+          selectedPiece = board[row][col];
+          selectedRow = row;
+          selectedCol = col;
+        }
       }
       // there is the piece which is already selected but the player can select another piece
       else if (board[row][col] != null &&
@@ -251,6 +254,35 @@ class _GameBoardState extends State<GameBoard> {
     return candidateMoves;
   }
 
+  //to move the pieces
+  void movePiece(int newRow, int newCol) {
+    // if the new spot has an opponent piece
+    if (board[newRow][newCol] != null) {
+      var capturedPiece = board[newRow][newCol]!;
+      //adding to their places
+      if (capturedPiece.isWhite) {
+        capturedWhitePieces.add(capturedPiece);
+      } else {
+        capturedBlackPieces.add(capturedPiece);
+      }
+    }
+
+    // move and clear the previous position
+    board[newRow][newCol] = board[selectedRow][selectedCol];
+    board[selectedRow][selectedCol] = null;
+
+    // clear the selection
+    setState(() {
+      selectedPiece = null;
+      selectedRow = -1;
+      selectedCol = -1;
+      validMoves = [];
+    });
+
+    // change the turn
+    isWhiteTurn = !isWhiteTurn;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -369,32 +401,6 @@ class _GameBoardState extends State<GameBoard> {
     });
   }
 
-  //to move the pieces
-  void movePiece(int newRow, int newCol) {
-    // if the new spot has an opponent piece
-    if (board[newRow][newCol] != null) {
-      var capturedPiece = board[newRow][newCol]!;
-      //adding to their places
-      if (capturedPiece.isWhite) {
-        capturedWhitePieces.add(capturedPiece);
-      } else {
-        capturedBlackPieces.add(capturedPiece);
-      }
-    }
-
-    // move and clear the previous position
-    board[newRow][newCol] = board[selectedRow][selectedCol];
-    board[selectedRow][selectedCol] = null;
-
-    // clear the selection
-    setState(() {
-      selectedPiece = null;
-      selectedRow = -1;
-      selectedCol = -1;
-      validMoves = [];
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -403,6 +409,7 @@ class _GameBoardState extends State<GameBoard> {
           // here are the white pieces taken
           Expanded(
             child: GridView.builder(
+              physics: NeverScrollableScrollPhysics(),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 8,
               ),
@@ -457,6 +464,7 @@ class _GameBoardState extends State<GameBoard> {
           // and here are the black pieces taken
           Expanded(
             child: GridView.builder(
+              physics: NeverScrollableScrollPhysics(),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 8,
               ),
