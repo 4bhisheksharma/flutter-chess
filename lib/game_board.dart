@@ -1,4 +1,5 @@
 import 'package:chess/helper/helper_methods.dart';
+import 'package:chess/shared/theme.dart';
 import 'package:chess/widgets/dead_piece.dart';
 import 'package:chess/widgets/piece.dart';
 import 'package:chess/widgets/square.dart';
@@ -33,6 +34,11 @@ class _GameBoardState extends State<GameBoard> {
 
   // this is a bool to indicate whose turn
   bool isWhiteTurn = true;
+
+  // initial position of king to see if the king is in check
+  List<int> whiteKingPosition = [7, 4];
+  List<int> blackKingPosition = [0, 4];
+  bool checkStatus = false;
 
   // this function is called when a square is tapped
   void pieceSelected(int row, int col) {
@@ -271,6 +277,13 @@ class _GameBoardState extends State<GameBoard> {
     board[newRow][newCol] = board[selectedRow][selectedCol];
     board[selectedRow][selectedCol] = null;
 
+    // this sees if the king is in check
+    if (isKingInCheck(!isWhiteTurn)) {
+      checkStatus = true;
+    } else {
+      checkStatus = false;
+    }
+
     // clear the selection
     setState(() {
       selectedPiece = null;
@@ -281,6 +294,38 @@ class _GameBoardState extends State<GameBoard> {
 
     // change the turn
     isWhiteTurn = !isWhiteTurn;
+  }
+
+  bool isKingInCheck(bool isWhiteKing) {
+    // Get the position of the king
+    List<int> kingPosition = isWhiteKing
+        ? whiteKingPosition
+        : blackKingPosition;
+
+    // Check if any opponent piece can attack the king
+    for (int i = 0; i < 8; i++) {
+      for (int j = 0; j < 8; j++) {
+        // Ensure we don't check our own pieces
+        if (board[i][j] == null || board[i][j]!.isWhite == isWhiteKing) {
+          continue;
+        }
+
+        // this Calculate valid moves for the current piece
+        List<List<int>> pieceValidMoves = calculateRawValidMoves(
+          i,
+          j,
+          board[i][j],
+        );
+
+        // Check if the king's position is in the valid moves of any piece
+        if (pieceValidMoves.any(
+          (move) => move[0] == kingPosition[0] && move[1] == kingPosition[1],
+        )) {
+          return true; // king check vayo
+        }
+      }
+    }
+    return false; // No check found
   }
 
   @override
@@ -421,8 +466,20 @@ class _GameBoardState extends State<GameBoard> {
             ),
           ),
 
+          // game status to show check or not and the winner and all
+          Text(
+            checkStatus ? "CHECK CHHA!" : "",
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: MyColors.checkColor,
+            ),
+
+            //TODO: for winner announcement
+          ),
+
           Expanded(
-            flex: 4,
+            flex: 5,
             child: GridView.builder(
               itemCount: 8 * 8,
               physics: const NeverScrollableScrollPhysics(),
