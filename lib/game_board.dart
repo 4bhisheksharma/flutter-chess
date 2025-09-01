@@ -194,6 +194,10 @@ class _GameBoardState extends State<GameBoard> {
     });
   }
 
+  bool isInBoard(int row, int col) {
+    return row >= 0 && row < 8 && col >= 0 && col < 8;
+  }
+
   // calculate raw valid move
   List<List<int>> calculateRawValidMoves(
     int row,
@@ -501,10 +505,26 @@ class _GameBoardState extends State<GameBoard> {
       validMoves = [];
     });
 
+    //check it is a checkmate
+    if (isCheckMate(!isWhiteTurn)) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text("Checkmate"),
+          // content: Text(
+          //   isWhiteTurn ? "White is in checkmate!" : "Black is in checkmate!",
+          // ),
+          actions: [
+            TextButton(onPressed: resetGame, child: Text("Lu Feri Khelum!")),
+          ],
+        ),
+      );
+    }
     // change the turn
     isWhiteTurn = !isWhiteTurn;
   }
 
+  // this checks that king is in check or not
   bool isKingInCheck(bool isWhiteKing) {
     // Get the position of the king
     List<int> kingPosition = isWhiteKing
@@ -538,9 +558,54 @@ class _GameBoardState extends State<GameBoard> {
     return false; // No check found
   }
 
+  // to check that it is check mate or not
+  bool isCheckMate(bool isWhiteKing) {
+    // if the king is not in check, its not check mate
+    if (!isKingInCheck(isWhiteKing)) {
+      return false;
+    }
+
+    //if there is at least one legal move for the king or any other piece, then it's not checkmate
+    for (int i = 0; i < 8; i++) {
+      for (int j = 0; j < 8; j++) {
+        if (board[i][j] == null || board[i][j]!.isWhite != isWhiteKing) {
+          continue;
+        }
+
+        List<List<int>> pieceValidMoves = calculateRealValidMoves(
+          i,
+          j,
+          board[i][j],
+          true,
+        );
+
+        if (pieceValidMoves.isNotEmpty) {
+          return false; // Found at least one legal move
+        }
+      }
+    }
+
+    return true; // No legal moves found, it's checkmate
+  }
+
+  // reset game(new Game)
+  void resetGame() {
+    Navigator.pop(context);
+    _initializeBoard();
+    checkStatus = false;
+    capturedWhitePieces.clear();
+    capturedBlackPieces.clear();
+    whiteKingPosition = [7, 4];
+    blackKingPosition = [0, 4];
+    isWhiteTurn = true;
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      //make the background matt black
+      backgroundColor: MyColors.bgColor,
       body: Column(
         children: [
           // here are the white pieces taken
@@ -551,23 +616,23 @@ class _GameBoardState extends State<GameBoard> {
                 crossAxisCount: 8,
               ),
               itemCount: capturedWhitePieces.length,
-              itemBuilder: (context, index) => DeadPiece(
-                imagePath: capturedWhitePieces[index].imagePath,
-                isWhite: true,
-              ),
+              itemBuilder: (BuildContext context, int index) {
+                return DeadPiece(
+                  imagePath: capturedWhitePieces[index].imagePath,
+                  isWhite: true,
+                );
+              },
             ),
           ),
 
           // game status to show check or not and the winner and all
           Text(
-            checkStatus ? "CHECK CHHA!" : "",
+            checkStatus ? "CHECK CHHA Hai!" : "",
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
               color: MyColors.checkColor,
             ),
-
-            //TODO: for winner announcement
           ),
 
           Expanded(
@@ -618,10 +683,12 @@ class _GameBoardState extends State<GameBoard> {
                 crossAxisCount: 8,
               ),
               itemCount: capturedBlackPieces.length,
-              itemBuilder: (context, index) => DeadPiece(
-                imagePath: capturedBlackPieces[index].imagePath,
-                isWhite: false,
-              ),
+              itemBuilder: (BuildContext context, int index) {
+                return DeadPiece(
+                  imagePath: capturedBlackPieces[index].imagePath,
+                  isWhite: true,
+                );
+              },
             ),
           ),
         ],
