@@ -40,6 +40,124 @@ class _GameBoardState extends State<GameBoard> {
   List<int> blackKingPosition = [0, 4];
   bool checkStatus = false;
 
+  @override
+  void initState() {
+    super.initState();
+    _initializeBoard();
+  }
+
+  void _initializeBoard() {
+    List<List<ChessPiece?>> newBoard = List.generate(
+      8,
+      (index) => List.generate(8, (index) => null),
+    );
+
+    // this is only for testing ---
+    // newBoard[3][3] = ChessPiece(
+    //   type: ChessPieceType.knight,
+    //   isWhite: true,
+    //   imagePath: 'assets/images/wn.png',
+    // );
+
+    // Place pawns
+    for (int i = 0; i < 8; i++) {
+      newBoard[1][i] = ChessPiece(
+        type: ChessPieceType.pawn,
+        isWhite: false,
+        imagePath: 'assets/images/bp.png',
+      );
+      newBoard[6][i] = ChessPiece(
+        type: ChessPieceType.pawn,
+        isWhite: true,
+        imagePath: 'assets/images/wp.png',
+      );
+    }
+    // Place other pieces
+    newBoard[0][0] = ChessPiece(
+      type: ChessPieceType.rook,
+      isWhite: false,
+      imagePath: 'assets/images/br.png',
+    );
+    newBoard[0][1] = ChessPiece(
+      type: ChessPieceType.knight,
+      isWhite: false,
+      imagePath: 'assets/images/bn.png',
+    );
+    newBoard[0][2] = ChessPiece(
+      type: ChessPieceType.bishop,
+      isWhite: false,
+      imagePath: 'assets/images/bb.png',
+    );
+    newBoard[0][3] = ChessPiece(
+      type: ChessPieceType.queen,
+      isWhite: false,
+      imagePath: 'assets/images/bq.png',
+    );
+    newBoard[0][4] = ChessPiece(
+      type: ChessPieceType.king,
+      isWhite: false,
+      imagePath: 'assets/images/bk.png',
+    );
+    newBoard[0][5] = ChessPiece(
+      type: ChessPieceType.bishop,
+      isWhite: false,
+      imagePath: 'assets/images/bb.png',
+    );
+    newBoard[0][6] = ChessPiece(
+      type: ChessPieceType.knight,
+      isWhite: false,
+      imagePath: 'assets/images/bn.png',
+    );
+    newBoard[0][7] = ChessPiece(
+      type: ChessPieceType.rook,
+      isWhite: false,
+      imagePath: 'assets/images/br.png',
+    );
+    newBoard[7][0] = ChessPiece(
+      type: ChessPieceType.rook,
+      isWhite: true,
+      imagePath: 'assets/images/wr.png',
+    );
+    newBoard[7][1] = ChessPiece(
+      type: ChessPieceType.knight,
+      isWhite: true,
+      imagePath: 'assets/images/wn.png',
+    );
+    newBoard[7][2] = ChessPiece(
+      type: ChessPieceType.bishop,
+      isWhite: true,
+      imagePath: 'assets/images/wb.png',
+    );
+    newBoard[7][3] = ChessPiece(
+      type: ChessPieceType.queen,
+      isWhite: true,
+      imagePath: 'assets/images/wq.png',
+    );
+    newBoard[7][4] = ChessPiece(
+      type: ChessPieceType.king,
+      isWhite: true,
+      imagePath: 'assets/images/wk.png',
+    );
+    newBoard[7][5] = ChessPiece(
+      type: ChessPieceType.bishop,
+      isWhite: true,
+      imagePath: 'assets/images/wb.png',
+    );
+    newBoard[7][6] = ChessPiece(
+      type: ChessPieceType.knight,
+      isWhite: true,
+      imagePath: 'assets/images/wn.png',
+    );
+    newBoard[7][7] = ChessPiece(
+      type: ChessPieceType.rook,
+      isWhite: true,
+      imagePath: 'assets/images/wr.png',
+    );
+    setState(() {
+      board = newBoard;
+    });
+  }
+
   // this function is called when a square is tapped
   void pieceSelected(int row, int col) {
     setState(() {
@@ -67,10 +185,11 @@ class _GameBoardState extends State<GameBoard> {
       }
 
       // here is the logic of determining valid moves for the selected piece
-      validMoves = calculateRawValidMoves(
+      validMoves = calculateRealValidMoves(
         selectedRow,
         selectedCol,
         selectedPiece,
+        true,
       ); // it is raw since some moves may be blocked or illigal
     });
   }
@@ -271,6 +390,76 @@ class _GameBoardState extends State<GameBoard> {
     return candidateMoves;
   }
 
+  // calculate real valid move
+  List<List<int>> calculateRealValidMoves(
+    int row,
+    int col,
+    ChessPiece? piece,
+    bool checkSimulation,
+  ) {
+    List<List<int>> realValidMoves = [];
+    List<List<int>> candidateMoves = calculateRawValidMoves(row, col, piece);
+
+    // filter out invalid moves
+    if (checkSimulation) {
+      for (var move in candidateMoves) {
+        int endRow = move[0];
+        int endCol = move[1];
+
+        if (simulatedMoveIsSafe(piece!, row, col, endRow, endCol)) {
+          realValidMoves.add(move);
+        }
+      }
+    } else {
+      realValidMoves = candidateMoves;
+    }
+    return realValidMoves;
+  }
+
+  // simulate a future move to see its safe
+  bool simulatedMoveIsSafe(
+    ChessPiece piece,
+    int startRow,
+    int startCol,
+    int endRow,
+    int endCol,
+  ) {
+    ChessPiece? originalDestinationPiece = board[endRow][endCol];
+
+    List<int>? originalKingPosition;
+    if (piece.type == ChessPieceType.king) {
+      originalKingPosition = piece.isWhite
+          ? whiteKingPosition
+          : blackKingPosition;
+
+      if (piece.isWhite) {
+        whiteKingPosition = [endRow, endCol];
+      } else {
+        blackKingPosition = [endRow, endCol];
+      }
+    }
+
+    // Simulate the move
+    board[endRow][endCol] = piece;
+    board[startRow][startCol] = null;
+
+    // Check if the king is in check after the simulated move
+    bool kingInCheck = isKingInCheck(piece.isWhite);
+
+    board[startRow][startCol] = piece;
+    board[endRow][endCol] = originalDestinationPiece;
+
+    if (piece.type == ChessPieceType.king) {
+      if (piece.isWhite) {
+        whiteKingPosition = originalKingPosition!;
+      } else {
+        blackKingPosition = originalKingPosition!;
+      }
+    }
+
+    return !kingInCheck;
+  }
+
   //to move the pieces
   void movePiece(int newRow, int newCol) {
     // if the new spot has an opponent piece
@@ -281,6 +470,15 @@ class _GameBoardState extends State<GameBoard> {
         capturedWhitePieces.add(capturedPiece);
       } else {
         capturedBlackPieces.add(capturedPiece);
+      }
+    }
+
+    // check if the piece is being moved in a king
+    if (selectedPiece!.type == ChessPieceType.king) {
+      if (selectedPiece!.isWhite) {
+        whiteKingPosition = [newRow, newCol];
+      } else {
+        blackKingPosition = [newRow, newCol];
       }
     }
 
@@ -322,10 +520,11 @@ class _GameBoardState extends State<GameBoard> {
         }
 
         // this Calculate valid moves for the current piece
-        List<List<int>> pieceValidMoves = calculateRawValidMoves(
+        List<List<int>> pieceValidMoves = calculateRealValidMoves(
           i,
           j,
           board[i][j],
+          false,
         );
 
         // Check if the king's position is in the valid moves of any piece
@@ -337,124 +536,6 @@ class _GameBoardState extends State<GameBoard> {
       }
     }
     return false; // No check found
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _initializeBoard();
-  }
-
-  void _initializeBoard() {
-    List<List<ChessPiece?>> newBoard = List.generate(
-      8,
-      (index) => List.generate(8, (index) => null),
-    );
-
-    // this is only for testing ---
-    // newBoard[3][3] = ChessPiece(
-    //   type: ChessPieceType.knight,
-    //   isWhite: true,
-    //   imagePath: 'assets/images/wn.png',
-    // );
-
-    // Place pawns
-    for (int i = 0; i < 8; i++) {
-      newBoard[1][i] = ChessPiece(
-        type: ChessPieceType.pawn,
-        isWhite: false,
-        imagePath: 'assets/images/bp.png',
-      );
-      newBoard[6][i] = ChessPiece(
-        type: ChessPieceType.pawn,
-        isWhite: true,
-        imagePath: 'assets/images/wp.png',
-      );
-    }
-    // Place other pieces
-    newBoard[0][0] = ChessPiece(
-      type: ChessPieceType.rook,
-      isWhite: false,
-      imagePath: 'assets/images/br.png',
-    );
-    newBoard[0][1] = ChessPiece(
-      type: ChessPieceType.knight,
-      isWhite: false,
-      imagePath: 'assets/images/bn.png',
-    );
-    newBoard[0][2] = ChessPiece(
-      type: ChessPieceType.bishop,
-      isWhite: false,
-      imagePath: 'assets/images/bb.png',
-    );
-    newBoard[0][3] = ChessPiece(
-      type: ChessPieceType.queen,
-      isWhite: false,
-      imagePath: 'assets/images/bq.png',
-    );
-    newBoard[0][4] = ChessPiece(
-      type: ChessPieceType.king,
-      isWhite: false,
-      imagePath: 'assets/images/bk.png',
-    );
-    newBoard[0][5] = ChessPiece(
-      type: ChessPieceType.bishop,
-      isWhite: false,
-      imagePath: 'assets/images/bb.png',
-    );
-    newBoard[0][6] = ChessPiece(
-      type: ChessPieceType.knight,
-      isWhite: false,
-      imagePath: 'assets/images/bn.png',
-    );
-    newBoard[0][7] = ChessPiece(
-      type: ChessPieceType.rook,
-      isWhite: false,
-      imagePath: 'assets/images/br.png',
-    );
-    newBoard[7][0] = ChessPiece(
-      type: ChessPieceType.rook,
-      isWhite: true,
-      imagePath: 'assets/images/wr.png',
-    );
-    newBoard[7][1] = ChessPiece(
-      type: ChessPieceType.knight,
-      isWhite: true,
-      imagePath: 'assets/images/wn.png',
-    );
-    newBoard[7][2] = ChessPiece(
-      type: ChessPieceType.bishop,
-      isWhite: true,
-      imagePath: 'assets/images/wb.png',
-    );
-    newBoard[7][3] = ChessPiece(
-      type: ChessPieceType.queen,
-      isWhite: true,
-      imagePath: 'assets/images/wq.png',
-    );
-    newBoard[7][4] = ChessPiece(
-      type: ChessPieceType.king,
-      isWhite: true,
-      imagePath: 'assets/images/wk.png',
-    );
-    newBoard[7][5] = ChessPiece(
-      type: ChessPieceType.bishop,
-      isWhite: true,
-      imagePath: 'assets/images/wb.png',
-    );
-    newBoard[7][6] = ChessPiece(
-      type: ChessPieceType.knight,
-      isWhite: true,
-      imagePath: 'assets/images/wn.png',
-    );
-    newBoard[7][7] = ChessPiece(
-      type: ChessPieceType.rook,
-      isWhite: true,
-      imagePath: 'assets/images/wr.png',
-    );
-    setState(() {
-      board = newBoard;
-    });
   }
 
   @override

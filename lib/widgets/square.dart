@@ -16,6 +16,7 @@ class Square extends StatelessWidget {
     required this.isSelected,
     required this.isValidMove,
     required this.isCanChapture,
+  
     required this.onTap,
   });
 
@@ -25,9 +26,13 @@ class Square extends StatelessWidget {
     if (isSelected) {
       squareColor = MyColors.selectedColor;
 
+    // if king is in check than make that king square red
+    //TODO:
+    
       // } else if (isValidMove) {
       //   squareColor = MyColors.validMoveColor;
     }
+
     // make a capture indicator
     else if (isCanChapture) {
       squareColor = MyColors.captureColor;
